@@ -6,14 +6,14 @@ class Join(commands.Cog):
     def __init__(self, client):
         self.client = client
         
-    @client.event
-    async def on_memeber_join(member):
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
         print(f"Terrific 😃{member} has joined the server!")
 
-    @client.event
-    async def on_member_join(member):(
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
         print(f"Sadly,🥺 {member} has left the server.")
 
 
-def setup(client):
-    client.add_cog(Join(client))
+async def setup(client):
+    await client.add_cog(Join(client))

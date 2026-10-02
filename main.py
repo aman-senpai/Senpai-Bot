@@ -2,6 +2,7 @@ import discord
 import random
 import os
 import json
+import asyncio
 from discord.ext import commands, tasks
 from itertools import cycle
 token = os.environ["Senpai_bot"]
@@ -11,7 +12,14 @@ def get_prefix(client, message):
         prefixes = json.load(f)
     return prefixes[str(message.guild.id)]
 
-client = commands.Bot(command_prefix=get_prefix)
+intents = discord.Intents.default()
+# discord.py 2.x no longer enables these privileged intents by default; without them
+# prefix commands receive no content and member events never fire. Enable both in the
+# Discord developer portal or login will fail with PrivilegedIntentsRequired.
+intents.message_content = True
+intents.members = True
+
+client = commands.Bot(command_prefix=get_prefix, intents=intents)
 status = cycle(["Online", "AFK", "Busy not Giving fuck"])
 
 
@@ -86,16 +94,23 @@ async def change_status():
 
 @client.command()
 async def load(ctx, extension):
-    client.load_extension(f"cogs.{extension}")
+    await client.load_extension(f"cogs.{extension}")
     await ctx.send(f"{extension} liberary loaded")
 
 @client.command()
 async def unload(ctx, extension):
-    client.unload_extension(f"cogs.{extension}")
+    await client.unload_extension(f"cogs.{extension}")
     await ctx.send(f"{extension} liberary unloaded")
 
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        client.load_extension(f"cogs.{filename[:-3]}")
+async def load_extensions():
+    for filename in os.listdir("./cogs"):
+        if filename.endswith(".py"):
+            await client.load_extension(f"cogs.{filename[:-3]}")
 
-client.run(token)
+async def main():
+    # In discord.py 2.x extensions must be loaded inside a running event loop.
+    async with client:
+        await load_extensions()
+        await client.start(token)
+
+asyncio.run(main())

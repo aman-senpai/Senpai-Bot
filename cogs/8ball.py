@@ -29,5 +29,5 @@ class Games(commands.Cog):
                     "You may rely on it."]
         await ctx.send(f"{random.choice(responses)}")
 
-def setup(client):
-    client.add_cog(Games(client))
+async def setup(client):
+    await client.add_cog(Games(client))

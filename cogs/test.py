@@ -11,5 +11,5 @@ class Test(commands.Cog):
         await ctx.send("Text!")
     
 
-def setup(client):
-    client.add_cog(Test(client))
+async def setup(client):
+    await client.add_cog(Test(client))
